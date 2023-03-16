@@ -11,13 +11,14 @@ import { auth } from "../../../firebase/clientApp";
 import useCommunityData from "../../../hooks/useCommunityData";
 
 const CreateCommmunityPostPage: NextPage = () => {
+  const [user] = useAuthState(auth);
   return (
     <PageContentLayout>
       <>
         <Box p="14px 0px" borderBottom="1px solid white">
           <Text>Create Community Post</Text>
         </Box>
-        <NewPostForm />
+        {user && <NewPostForm user={user} />}
       </>
       <></>
     </PageContentLayout>
