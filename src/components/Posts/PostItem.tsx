@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import {
+  Alert,
+  AlertIcon,
   Flex,
   Icon,
   Image,
@@ -23,18 +25,13 @@ import {
 import { Post } from "@/atoms/postsAtom";
 import Link from "next/link";
 import moment from "moment";
+import error from "next/error";
 
 type PostItemContentProps = {
   post: Post;
   userIsCreator: boolean;
   userVoteValue?: number;
-  onVote: (
-    event: React.MouseEvent<SVGElement, MouseEvent>,
-    post: Post,
-    vote: number,
-    communityId: string,
-    postIdx?: number
-  ) => void;
+  onVote: (post: Post, vote: number, communityId: string) => void;
   onDeletePost: (post: Post) => Promise<boolean>;
   onSelectPost?: (value: Post, postIdx: number) => void;
   router?: NextRouter;
@@ -55,6 +52,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
 }) => {
   const [loadingImage, setLoadingImage] = useState(true);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
   const singlePostView = !onSelectPost; // function not passed to [pid]
 
   const handleDelete = async (
@@ -66,18 +64,12 @@ const PostItem: React.FC<PostItemContentProps> = ({
       const success = await onDeletePost(post);
       if (!success) throw new Error("Failed to delete post");
 
-      console.log("Post successfully deleted");
-
-      // Could proably move this logic to onDeletePost function
       if (router) router.back();
     } catch (error: any) {
-      console.log("Error deleting post", error.message);
-      /**
-       * Don't need to setLoading false if no error
-       * as item will be removed from DOM
-       */
-      setLoadingDelete(false);
+      setDeleteError(error.message);
       // setError
+
+      setLoadingDelete(false);
     }
   };
 
@@ -106,7 +98,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
           color={userVoteValue === 1 ? "brand.100" : "gray.400"}
           fontSize={22}
           cursor="pointer"
-          onClick={(event) => onVote(event, post, 1, post.communityId)}
+          onClick={() => onVote(post, 1, post.communityId)}
         />
         <Text fontSize="9pt" fontWeight={600}>
           {post.voteStatus}
@@ -120,10 +112,16 @@ const PostItem: React.FC<PostItemContentProps> = ({
           color={userVoteValue === -1 ? "#4379FF" : "gray.400"}
           fontSize={22}
           cursor="pointer"
-          onClick={(event) => onVote(event, post, -1, post.communityId)}
+          onClick={() => onVote(post, -1, post.communityId)}
         />
       </Flex>
       <Flex direction="column" width="100%">
+        {deleteError && (
+          <Alert status="error">
+            <AlertIcon />
+            <Text mr={2}>{deleteError}</Text>
+          </Alert>
+        )}
         <Stack spacing={1} p="10px 10px">
           {post.createdAt && (
             <Stack direction="row" spacing={0.6} align="center" fontSize="9pt">

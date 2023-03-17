@@ -3,7 +3,7 @@ import { Community } from "@/atoms/communitiesAtom";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { auth, firestore } from "@/firebase/clientApp";
 import usePosts from "@/hooks/usePosts";
-import { Post } from "@/atoms/postsAtom";
+import { Post, postState } from "@/atoms/postsAtom";
 import PostItem from "./PostItem";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Stack } from "@chakra-ui/react";
@@ -60,15 +60,19 @@ const Posts: React.FC<PostProps> = ({ communityData, userId }) => {
         <PostLoader />
       ) : (
         <Stack>
-          {postStateValue.posts.map((item) => (
+          {postStateValue.posts.map((post: Post, index) => (
             <PostItem
-              key={item.id}
-              post={item}
-              userIsCreator={user?.uid === item.creatorId}
-              userVoteValue={undefined}
+              key={post.id}
+              post={post}
+              // postIdx={index}
               onVote={onVote}
-              onSelectPost={onSelectPost}
               onDeletePost={onDeletePost}
+              userVoteValue={
+                postStateValue.postVotes.find((item) => item.postId === post.id)
+                  ?.voteValue
+              }
+              userIsCreator={userId === post.creatorId}
+              onSelectPost={onSelectPost}
             />
           ))}
         </Stack>
@@ -76,5 +80,4 @@ const Posts: React.FC<PostProps> = ({ communityData, userId }) => {
     </>
   );
 };
-
 export default Posts;
