@@ -1,15 +1,15 @@
+import About from "@/components/Community/About";
 import NewPostForm from "@/components/Posts/NewPostForm";
+import useCommunityData from "@/hooks/useCommunityData";
 import { Box, Text } from "@chakra-ui/react";
 import { NextPage } from "next";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useRecoilValue } from "recoil";
-import { communityState } from "../../../atoms/communitiesAtom";
 import PageContentLayout from "../../../components/Layout/PageContent";
 import { auth } from "../../../firebase/clientApp";
 
 const CreateCommmunityPostPage: NextPage = () => {
   const [user] = useAuthState(auth);
-  const communityStateValue = useRecoilValue(communityState);
+  const { communityStateValue } = useCommunityData();
   return (
     <PageContentLayout>
       <>
@@ -18,7 +18,11 @@ const CreateCommmunityPostPage: NextPage = () => {
         </Box>
         {user && <NewPostForm user={user} />}
       </>
-      <></>
+      {communityStateValue.currentCommunity && (
+        <>
+          <About communityData={communityStateValue.currentCommunity} />
+        </>
+      )}
     </PageContentLayout>
   );
 };

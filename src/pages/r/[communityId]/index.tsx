@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { GetServerSidePropsContext } from "next";
-import { firestore } from "@/firebase/clientApp";
+import { auth, firestore } from "@/firebase/clientApp";
 import { doc, getDoc } from "firebase/firestore";
 import { Community, communityState } from "@/atoms/communitiesAtom";
 import safeJsonStringify from "safe-json-stringify";
@@ -11,12 +11,14 @@ import CreatePostLink from "@/components/Community/CreatePostLink";
 import Posts from "@/components/Posts/Posts";
 import { useSetRecoilState } from "recoil";
 import About from "@/components/Community/About";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 type CommunityPageProps = {
   communityData: Community;
 };
 
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
+  const [user] = useAuthState(auth);
   const setCommunityStateValue = useSetRecoilState(communityState);
   useEffect(() => {
     if (!communityData) return;
@@ -36,7 +38,7 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       <PageContent>
         <>
           <CreatePostLink />
-          <Posts communityData={communityData} />
+          <Posts communityData={communityData} userId={user?.uid} />
         </>
         <>
           <About communityData={communityData} />

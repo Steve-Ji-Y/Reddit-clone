@@ -1,3 +1,4 @@
+import { authModalState } from "@/atoms/authModalAtom";
 import { communityState } from "@/atoms/communitiesAtom";
 import { Post, postState, PostVote } from "@/atoms/postsAtom";
 import { auth, firestore, storage } from "@/firebase/clientApp";
@@ -11,27 +12,30 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 const usePosts = () => {
   const [user] = useAuthState(auth);
   const [postStateValue, setPostStateValue] = useRecoilState(postState);
   const communityStateValue = useRecoilValue(communityState);
+  const setAuthModalState = useSetRecoilState(authModalState);
+  const router = useRouter();
 
   const onVote = async (
-    // event: React.MouseEvent<SVGElement, MouseEvent>,
+    event: React.MouseEvent<SVGElement, MouseEvent>,
     post: Post,
     vote: number,
     communityId: string
     // postIdx?: number
   ) => {
-    // event.stopPropagation();
-    // if (!user?.uid) {
-    //   setAuthModalState({ open: true, view: "login" });
-    //   return;
-    // }
+    event.stopPropagation();
+    if (!user?.uid) {
+      setAuthModalState({ isOpen: true, view: "login" });
+      return;
+    }
 
     const { voteStatus } = post;
     // const existingVote = post.currentUserVoteStatus;
@@ -116,18 +120,9 @@ const usePosts = () => {
       updatedState = {
         ...updatedState,
         posts: updatedPosts,
-        // postsCache: {
-        //   ...updatedState.postsCache,
-        //   [communityId]: updatedPosts,
-        // },
       };
-      // }
 
-      /**
-       * Optimistically update the UI
-       * Used for single page view [pid]
-       * since we don't have real-time listener there
-       */
+      //
       if (updatedState.selectedPost) {
         updatedState = {
           ...updatedState,
@@ -147,7 +142,14 @@ const usePosts = () => {
     }
   };
 
-  const onSelectPost = () => {};
+  const onSelectPost = (post: Post) => {
+    setPostStateValue((prev) => ({
+      ...prev,
+      selectedPost: post,
+    }));
+
+    router.push(`/r/${post.communityId}/comments/${post.id}`);
+  };
 
   const onDeletePost = async (post: Post): Promise<boolean> => {
     try {
@@ -197,6 +199,16 @@ const usePosts = () => {
     if (!user?.uid || !communityStateValue.currentCommunity) return;
     getCommunityPostVotes(communityStateValue.currentCommunity.id);
   }, [user, communityStateValue.currentCommunity]);
+
+  useEffect(() => {
+    if (!user) {
+      // clear user post votes
+      setPostStateValue((prev) => ({
+        ...prev,
+        postVotes: [],
+      }));
+    }
+  }, [user]);
 
   return {
     postStateValue,

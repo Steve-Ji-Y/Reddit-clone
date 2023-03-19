@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { NextRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BsChat, BsDot } from "react-icons/bs";
 import { FaReddit } from "react-icons/fa";
@@ -31,9 +31,14 @@ type PostItemContentProps = {
   post: Post;
   userIsCreator: boolean;
   userVoteValue?: number;
-  onVote: (post: Post, vote: number, communityId: string) => void;
+  onVote: (
+    event: React.MouseEvent<SVGElement, MouseEvent>,
+    post: Post,
+    vote: number,
+    communityId: string
+  ) => void;
   onDeletePost: (post: Post) => Promise<boolean>;
-  onSelectPost?: (value: Post, postIdx: number) => void;
+  onSelectPost?: (value: Post) => void;
   router?: NextRouter;
   postIdx?: number;
   homePage?: boolean;
@@ -47,13 +52,13 @@ const PostItem: React.FC<PostItemContentProps> = ({
   onSelectPost,
   onDeletePost,
   postIdx,
-  router,
   homePage,
 }) => {
   const [loadingImage, setLoadingImage] = useState(true);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
   const singlePostView = !onSelectPost; // function not passed to [pid]
+  const router = useRouter();
 
   const handleDelete = async (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -64,7 +69,9 @@ const PostItem: React.FC<PostItemContentProps> = ({
       const success = await onDeletePost(post);
       if (!success) throw new Error("Failed to delete post");
 
-      if (router) router.back();
+      if (singlePostView) {
+        router.push(`/r/${post.communityId}`);
+      }
     } catch (error: any) {
       setDeleteError(error.message);
       // setError
@@ -81,7 +88,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
       borderRadius={singlePostView ? "4px 4px 0px 0px" : 4}
       cursor={singlePostView ? "unset" : "pointer"}
       _hover={{ borderColor: singlePostView ? "none" : "gray.500" }}
-      onClick={() => onSelectPost && post && onSelectPost(post, postIdx!)}
+      onClick={() => onSelectPost && onSelectPost(post)}
     >
       <Flex
         direction="column"
@@ -98,7 +105,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
           color={userVoteValue === 1 ? "brand.100" : "gray.400"}
           fontSize={22}
           cursor="pointer"
-          onClick={() => onVote(post, 1, post.communityId)}
+          onClick={(event) => onVote(event, post, 1, post.communityId)}
         />
         <Text fontSize="9pt" fontWeight={600}>
           {post.voteStatus}
@@ -112,7 +119,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
           color={userVoteValue === -1 ? "#4379FF" : "gray.400"}
           fontSize={22}
           cursor="pointer"
-          onClick={() => onVote(post, -1, post.communityId)}
+          onClick={(event) => onVote(event, post, -1, post.communityId)}
         />
       </Flex>
       <Flex direction="column" width="100%">
