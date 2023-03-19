@@ -52,7 +52,7 @@ const Posts: React.FC<PostProps> = ({ communityData, userId }) => {
 
   useEffect(() => {
     getPosts();
-  }, []);
+  }, [communityData]);
 
   return (
     <>
