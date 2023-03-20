@@ -129,7 +129,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
             <Text mr={2}>{deleteError}</Text>
           </Alert>
         )}
-        <Stack spacing={1} p="10px 10px">
+        <Stack spacing={1} p="10px">
           {post.createdAt && (
             <Stack direction="row" spacing={0.6} align="center" fontSize="9pt">
               {homePage && (
@@ -156,8 +156,7 @@ const PostItem: React.FC<PostItemContentProps> = ({
                 </>
               )}
               <Text color="gray.500">
-                Posted by u/
-                {/* {post.userDisplayText} */}
+                Posted by u/{post.creatorDisplayName}
                 {moment(new Date(post.createdAt.seconds * 1000)).fromNow()}
               </Text>
             </Stack>
