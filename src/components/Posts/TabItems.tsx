@@ -8,7 +8,7 @@ type TabItemProps = {
   setSelectedTab: (value: string) => void;
 };
 
-const TabItem: React.FC<TabItemProps> = ({
+const TabItems: React.FC<TabItemProps> = ({
   item,
   selected,
   setSelectedTab,
@@ -38,4 +38,4 @@ const TabItem: React.FC<TabItemProps> = ({
   );
 };
 
-export default TabItem;
+export default TabItems;

@@ -18,7 +18,7 @@ import { BsLink45Deg, BsMic } from "react-icons/bs";
 import { IoDocumentText, IoImageOutline } from "react-icons/io5";
 import ImageUpload from "./PostForm/ImageUpload";
 import TextInputs from "./PostForm/TextInputs";
-import TabItem from "./TabItem";
+import TabItems from "./TabItems";
 
 type NewPostFormProps = {
   user: User;
@@ -125,7 +125,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
     <Flex direction="column" bg="white" borderRadius={4} mt={2}>
       <Flex width="100%">
         {formTabs.map((item) => (
-          <TabItem
+          <TabItems
             key={item.title}
             item={item}
             selected={item.title === selectedTab}
